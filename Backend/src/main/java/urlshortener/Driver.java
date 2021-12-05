@@ -1,5 +1,6 @@
 package urlshortener;
 
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import urlshortener.server.MainServer;
@@ -32,7 +33,8 @@ public class Driver {
         Path angularFrontendDir;
 
         // Try and see if there is a different port to use
-        if (System.getenv(SERVER_PORT_ENV) != null && !System.getenv(SERVER_PORT_ENV).isBlank()) {
+
+        if (System.getenv(SERVER_PORT_ENV) != null && StringUtils.isNotBlank(System.getenv(SERVER_PORT_ENV))) {
             try {
                 serverPort = Integer.parseInt(System.getenv(SERVER_PORT_ENV));
             } catch (NumberFormatException e) {
@@ -43,8 +45,8 @@ public class Driver {
 
         // Check which version of the ShortURLService to use (Redis or standalone). Standalone has no persistence.
         if (System.getenv(USE_REDIS_ENV) != null && System.getenv(USE_REDIS_ENV).equals("TRUE")) {
-            if (System.getenv(REDIS_IP_ENV) != null && !System.getenv(REDIS_IP_ENV).isBlank() &&
-                    System.getenv(REDIS_PORT_ENV) != null && !System.getenv(REDIS_PORT_ENV).isBlank()) {
+            if (System.getenv(REDIS_IP_ENV) != null && StringUtils.isNotBlank(System.getenv(REDIS_IP_ENV)) &&
+                    System.getenv(REDIS_PORT_ENV) != null && StringUtils.isNotBlank(System.getenv(REDIS_PORT_ENV))) {
 
                 try {
                     int redisPort = Integer.parseInt(System.getenv(REDIS_PORT_ENV));
@@ -63,7 +65,7 @@ public class Driver {
         }
 
         // Check if the Path to the Angular Frontend is valid
-        if (System.getenv(ANGULAR_FRONTEND_DIR_ENV) != null && !System.getenv(ANGULAR_FRONTEND_DIR_ENV).isBlank()) {
+        if (System.getenv(ANGULAR_FRONTEND_DIR_ENV) != null && StringUtils.isNotBlank(System.getenv(ANGULAR_FRONTEND_DIR_ENV))) {
             try {
                 angularFrontendDir = Path.of(System.getenv(ANGULAR_FRONTEND_DIR_ENV));
                 MainServer server = new MainServer(serverPort, angularFrontendDir, shortURLService);

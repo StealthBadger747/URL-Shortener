@@ -19,7 +19,8 @@ I went a bit overboard with this implementation than was probalby expected, but 
 ## How to run/build
 There are two Bash scripts.
  - The first one is `run_docker.sh` which builds the docker container and then runs it with `docker-compose`. It contains Redis by default as well and the configuration options can be changed in the `docker-compose.yml`.
- - The second one is `run_standalone.sh` which requires npm and maven to be installed on the system. The maven build targets Java 8. The script has environment variables at the top which can be modified.
+ - The second one is `run_standalone.sh` which requires npm and maven to be installed on the system. The maven build targets Java 11+. The script has environment variables at the top which can be modified.
+   - Java 11 or greater is required
 
 ## Sources/Third Party Libraries:
 - Angular for frontend

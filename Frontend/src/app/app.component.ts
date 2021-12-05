@@ -13,6 +13,9 @@ export class AppComponent {
 
   constructor(public apiService: ApiService) { }
 
+  /**
+   * Handles the click event for SHORTEN button.
+   */
   public postShortenURL(): void {
     if (this.enteredURL.length === 0) {
       return;

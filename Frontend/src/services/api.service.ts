@@ -8,6 +8,11 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
+  /**
+   * Makes the API call to get a shortened URL.
+   * @param originalURL the original long url.
+   * @returns a Promise of the request.
+   */
   public createShortURL(originalURL: string): Promise<any> {
     const body = "";
     const params = new HttpParams()

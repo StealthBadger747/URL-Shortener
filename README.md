@@ -4,6 +4,7 @@
 - Jetty for the webserver (both frontend and api hosted there).
 - Redis as a database (optional).
   - It was chosen because of my familiarity however there are a couple downsides.
+  - I also use a Bloom Filter in addition to Redis in order to pre-filter calls to it. This saves time and resources, knowing if the key has already been seen or not.
   - It takes a snapshot of the database every 60s which I think is acceptable.
   - It is a in memory database so the amount of KV pairs is limited by RAM which is not ideal for a use case where there might be billions of entries.
   - If I had more time I would have used a database like LevelDB or Cassandra. Or implemented a custom solution using SSTables.
@@ -24,6 +25,7 @@ There are two Bash scripts.
 
 ## Sources/Third Party Libraries:
 - Angular for frontend
+- Bloom Filter from my Distributed File System project.
 - pom.xml libraries:
   - MurMur (fast hashing algo) https://sangupta.com/projects/murmur
   - Apache Commons as a helpful library for just about everything.

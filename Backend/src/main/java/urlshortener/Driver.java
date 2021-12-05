@@ -18,7 +18,7 @@ public class Driver {
     public static final String ANGULAR_FRONTEND_DIR_ENV = "ANGULAR_FRONTEND_DIR";
     public static final String USE_REDIS_ENV = "USE_REDIS";
     public static final String REDIS_IP_ENV = "REDIS_IP";
-    public static final int REDIS_PORT = 6379;
+    public static final String REDIS_PORT_ENV = "REDIS_PORT";
 
     /**
      * Initializes the classes necessary based on the provided environment variables.
@@ -36,17 +36,25 @@ public class Driver {
             try {
                 serverPort = Integer.parseInt(System.getenv(SERVER_PORT_ENV));
             } catch (NumberFormatException e) {
-                System.err.printf("The '"+SERVER_PORT_ENV+"' env variable has invalid formatting with a value of '%s'\n", System.getenv(SERVER_PORT_ENV));
+                System.err.printf("The '%s' env variable has invalid formatting with a value of '%s'\n", SERVER_PORT_ENV, System.getenv(SERVER_PORT_ENV));
                 System.out.printf("Starting the server with the default port of %d instead\n", serverPort);
             }
         }
 
         // Check which version of the ShortURLService to use (Redis or standalone). Standalone has no persistence.
         if (System.getenv(USE_REDIS_ENV) != null && System.getenv(USE_REDIS_ENV).equals("TRUE")) {
-            if (System.getenv(REDIS_IP_ENV) != null && !System.getenv(REDIS_IP_ENV).isBlank()) {
-                System.out.printf("Started with redis %s:%s\n", System.getenv(REDIS_IP_ENV), REDIS_PORT);
-                JedisPool pool = new JedisPool(new JedisPoolConfig(), System.getenv(REDIS_IP_ENV), REDIS_PORT);
-                shortURLService = new ShortURLServiceRedis(pool);
+            if (System.getenv(REDIS_IP_ENV) != null && !System.getenv(REDIS_IP_ENV).isBlank() &&
+                    System.getenv(REDIS_PORT_ENV) != null && !System.getenv(REDIS_PORT_ENV).isBlank()) {
+
+                try {
+                    int redisPort = Integer.parseInt(System.getenv(REDIS_PORT_ENV));
+                    System.out.printf("Started with redis %s:%s\n", System.getenv(REDIS_IP_ENV), redisPort);
+                    JedisPool pool = new JedisPool(new JedisPoolConfig(), System.getenv(REDIS_IP_ENV), redisPort);
+                    shortURLService = new ShortURLServiceRedis(pool);
+                } catch (NumberFormatException e) {
+                    System.err.printf("The '%s' env variable has invalid formatting with a value of '%s'\n", REDIS_PORT_ENV, System.getenv(REDIS_PORT_ENV));
+                    System.exit(1);
+                }
             }
             else {
                 System.err.println("Redis IP was not set!");

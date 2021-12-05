@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# 127.0.0.1 as a placeholder
 REDIS_IP=127.0.0.1
 
 if [[ $(uname -a | grep Linux) ]];

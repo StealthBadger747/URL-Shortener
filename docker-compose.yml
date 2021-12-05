@@ -19,3 +19,4 @@ services:
       - SERVER_PORT=8999
       - USE_REDIS=TRUE
       - REDIS_IP=$REDIS_IP
+      - REDIS_PORT=6379

@@ -4,6 +4,9 @@
 SERVER_PORT=8089
 ANGULAR_FRONTEND_DIR="$PWD/Frontend/dist/UrlShortener/"
 USE_REDIS=FALSE
+# Uncomment if USE_REDIS=TRUE
+#REDIS_IP={MACHINE IP}
+#REDIS_PORT={THE REDIS PORT}
 
 # Build the frontend
 cd Frontend

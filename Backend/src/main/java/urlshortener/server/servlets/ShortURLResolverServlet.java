@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * This Servlet is responsible for resolving the short URL into the full
+ * original URL. It sends a 301 redirect back to the client after resolving it.
+ */
 public class ShortURLResolverServlet extends HttpServlet {
     private final ShortURLService urlService;
 
@@ -16,6 +20,9 @@ public class ShortURLResolverServlet extends HttpServlet {
         this.urlService = urlService;
     }
 
+    /**
+     * Handles resolving the short URL into the full original URL.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

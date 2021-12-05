@@ -11,6 +11,9 @@ import urlshortener.services.ShortURLService;
 
 import java.nio.file.Path;
 
+/**
+ * This Class is in charge of coordinating the servlets. It acts as the Main Server.
+ */
 public class MainServer {
     /** The port used for the server */
     private final int port;

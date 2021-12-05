@@ -10,6 +10,9 @@ import urlshortener.services.ShortURLServiceStandAlone;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 
+/**
+ * Class responsible for running this project.
+ */
 public class Driver {
     public static final String SERVER_PORT_ENV = "SERVER_PORT";
     public static final String ANGULAR_FRONTEND_DIR_ENV = "ANGULAR_FRONTEND_DIR";
@@ -17,6 +20,11 @@ public class Driver {
     public static final String REDIS_IP_ENV = "REDIS_IP";
     public static final int REDIS_PORT = 6379;
 
+    /**
+     * Initializes the classes necessary based on the provided environment variables.
+     * This includes (but is not limited to) the use of redis and the web server port.
+     * @param args not used.
+     */
     public static void main(String[] args) {
         /* Setup defaults */
         int serverPort = 8080;

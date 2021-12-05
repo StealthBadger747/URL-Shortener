@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * This servlet is responsible for creating a short URL.
+ */
 public class CreateShortenedURLServlet extends HttpServlet {
     private final ShortURLService urlService;
     private final UrlValidator urlValidator;
@@ -21,6 +24,10 @@ public class CreateShortenedURLServlet extends HttpServlet {
         this.urlValidator = new UrlValidator();
     }
 
+    /**
+     * Handles the submission/request to shorten a URL.
+     * Returns a JSON response back to the client.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

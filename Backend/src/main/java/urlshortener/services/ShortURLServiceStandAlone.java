@@ -1,9 +1,12 @@
 package urlshortener.services;
 
 import org.apache.commons.lang3.RandomStringUtils;
-
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * This Class is for standalone operation without Redis or other database.
+ * It does not have any notion of persistence between restarts.
+ */
 public class ShortURLServiceStandAlone extends ShortURLService {
     public static final int SHORT_URL_LEN = 6;
     public final ConcurrentHashMap<String, String> shortenedURLsMap;

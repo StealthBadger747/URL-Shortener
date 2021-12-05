@@ -5,6 +5,11 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import urlshortener.util.BloomFilter;
 
+/**
+ * This Class is for operation in conjunction with Redis for persistency.
+ * Redis by default saves its database every 60 seconds, so it is not perfect,
+ * but it should be good enough.
+ */
 public class ShortURLServiceRedis extends ShortURLService {
     /** Variables for the bloom filter
      * The bloom filter provides concurrency protection to the redis database,

@@ -12,8 +12,11 @@
   - This mode just uses a ConcurrentHashMap to store the key value pairs. It will not survive a restart or crash.
 - The short URLs are generated randomly even for the same input. BaseX encoding schemes could have been used, however I noticed sites like tinyurl.com and bit.ly generate random keys for duplicate entries.
 
-## How to run/build
+## Note
+This project is also hosted on my server in my apartment at https://tnyurl.cx.
+I went a bit overboard with this implementation than was probalby expected, but I have been wanting to create a URL Shortener for myself for a while now and this was just a good opportunity. My server environment is exclusively in Docker so it didn't take too long to set up.
 
+## How to run/build
 There are two Bash scripts.
  - The first one is `run_docker.sh` which builds the docker container and then runs it with `docker-compose`. It contains Redis by default as well and the configuration options can be changed in the `docker-compose.yml`.
  - The second one is `run_standalone.sh` which requires npm and maven to be installed on the system. The maven build targets Java 8. The script has environment variables at the top which can be modified.

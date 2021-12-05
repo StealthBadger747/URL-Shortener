@@ -44,7 +44,7 @@ public class CreateShortenedURLServlet extends HttpServlet {
 
         // If the URL doesn't already have the http protocol prepended, then prepend it.
         if (!originalURL.startsWith("http")) {
-            originalURL = "http://".concat(originalURL);
+            originalURL = "http://" + originalURL;
         }
 
         // Don't convert invalid URLs

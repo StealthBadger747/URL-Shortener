@@ -9,8 +9,6 @@ import urlshortener.server.servlets.CreateShortenedURLServlet;
 import urlshortener.server.servlets.ShortURLResolverServlet;
 import urlshortener.services.ShortURLService;
 
-import javax.servlet.*;
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class MainServer {
@@ -35,7 +33,7 @@ public class MainServer {
      * Starts the server.
      */
     public void start() {
-        System.out.println("Starting Server...");
+        System.out.println("Starting Server with port " + this.port);
         System.setProperty("org.eclipse.jetty.LEVEL", "DEBUG");
         org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(this.port);
         server.setHandler(setupHandlers());

@@ -25,15 +25,15 @@ public class ShortURLResolverServlet extends HttpServlet {
 
         // Try to resolve the URL
         String longURL = this.urlService.resolveShortURL(shortcutURL.substring(1));
-
         if (longURL == null) {
             response.setStatus(404);
             response.getWriter().println("404 NOT FOUND!");
             return;
         }
+
         // Set the redirect to the resolved URL
-        response.sendRedirect(longURL);
-        response.setStatus(302);
+        response.setStatus(301);
+        response.setHeader("Location", longURL);
         response.getWriter().println("REDIRECTING TO " + longURL);
     }
 }

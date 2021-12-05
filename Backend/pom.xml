@@ -31,12 +31,7 @@
                 <version>3.8.1</version>
 
                 <configuration>
-                    <compilerArgs>
-                        <arg>${compileOptionXlint}</arg>
-                        <arg>${compileOptionXdoclint}</arg>
-                    </compilerArgs>
 
-                    <failOnWarning>${compileOptionFail}</failOnWarning>
                     <showWarnings>true</showWarnings>
                     <fork>true</fork>
                 </configuration>
@@ -86,13 +81,10 @@
                             </includes>
                         </filter>
                     </filters>
-
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
-                                <Main-Class>search.Driver</Main-Class>
-                                <X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
-                                <X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
+                                <Main-Class>urlshortener.Driver</Main-Class>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -102,6 +94,13 @@
     </build>
 
     <dependencies>
+        <!-- For redis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.7.0</version>
+        </dependency>
+
         <!-- For fast hashing -->
         <dependency>
             <groupId>com.sangupta</groupId>
@@ -149,6 +148,22 @@
             <artifactId>jetty-servlet</artifactId>
             <version>${jettyVersion}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-api</artifactId>-->
+<!--            <version>1.7.32</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-log4j12</artifactId>-->
+<!--            <version>1.7.32</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-simple</artifactId>-->
+<!--            <version>1.7.32</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
 </project>

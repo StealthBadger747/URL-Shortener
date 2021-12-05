@@ -20,7 +20,7 @@ RUN mvn install && \
     mvn package
 
 # This is were it gets run
-FROM openjdk:8-alpine
+FROM openjdk:8-jre
 
 COPY --from=maven-build-stage /app/backend/target/Url-Shortener-1.0.jar /app/backend/
 COPY --from=maven-build-stage /app/frontend /app/frontend

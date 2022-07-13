@@ -8,7 +8,7 @@
   - It takes a snapshot of the database every 60s which I think is acceptable.
   - It is a in memory database so the amount of KV pairs is limited by RAM which is not ideal for a use case where there might be billions of entries.
   - If I had more time I would have used a database like LevelDB or Cassandra. Or implemented a custom solution using SSTables.
-    - SSTables are used in LevelDB, however since I don't need to write over entries in the database ever LevelDB as more functionality than I need (and it isn't easily used with Java). SSTables are great for read heavy workloads from a disk.
+    - SSTables are used in LevelDB, however since I don't need to write over entries in the database ever, and LevelDB has more functionality than I need (and it isn't easily used with Java). SSTables are great for read heavy workloads from a disk.
 - Standalone mode w/o Redis available (no persistence).
   - This mode just uses a ConcurrentHashMap to store the key value pairs. It will not survive a restart or crash.
 - The short URLs are generated randomly even for the same input. BaseX encoding schemes could have been used, however I noticed sites like tinyurl.com and bit.ly generate random keys for duplicate entries.

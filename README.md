@@ -14,7 +14,7 @@
 - The short URLs are generated randomly even for the same input. BaseX encoding schemes could have been used, however I noticed sites like tinyurl.com and bit.ly generate random keys for duplicate entries.
 
 ## Note
-This project is also hosted on my server in my apartment at https://tnyurl.cx.
+This project is also hosted on my server in my apartment.
 I went a bit overboard with this implementation than was probably expected, but I have been wanting to create a URL Shortener for myself for a while now and this was just a good opportunity. My server environment is exclusively in Docker so it didn't take too long to set up.
 
 ## How to run/build

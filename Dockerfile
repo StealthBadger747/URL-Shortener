@@ -1,4 +1,4 @@
-FROM node:14-alpine as angular-build-stage
+FROM node:18-alpine as angular-build-stage
 
 COPY ./Frontend /app/frontend/src
 

@@ -1,13 +1,9 @@
 name: Docker Build
-description: Build the Docker Image.
 
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-    - master
+      - main
 
 jobs:
   build:
@@ -18,5 +14,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Docker Image
-        run: docker build -t url-shortener:latest .
-
+        run: docker build -t my-image-name:latest .

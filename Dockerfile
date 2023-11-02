@@ -1,13 +1,13 @@
-FROM node:14-alpine as angular-build-stage
+FROM node:20-alpine as angular-build-stage
 
 COPY ./Frontend /app/frontend/src
 
 WORKDIR /app/frontend/src
 
-RUN npm install && npx ng build --prod
+RUN npm install && npx ng build
 
 # Switch to maven build image
-FROM maven:3-openjdk-11-slim as maven-build-stage
+FROM maven:3-eclipse-temurin-21-alpine as maven-build-stage
 
 # Copy the compiled WebApp from stage 1 to the new container for use as templates
 COPY --from=angular-build-stage /app/frontend/src/dist/UrlShortener /app/frontend/dist/
@@ -20,7 +20,7 @@ RUN mvn install && \
     mvn package
 
 # This is were it gets run
-FROM openjdk:11-jre
+FROM eclipse-temurin:21-alpine
 
 COPY --from=maven-build-stage /app/backend/target/Url-Shortener-1.0.jar /app/backend/
 COPY --from=maven-build-stage /app/frontend /app/frontend

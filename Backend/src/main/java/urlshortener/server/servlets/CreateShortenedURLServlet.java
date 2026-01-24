@@ -32,7 +32,12 @@ public class CreateShortenedURLServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        response.setContentType("application/json");
+        boolean isHtmxRequest = "true".equalsIgnoreCase(request.getHeader("HX-Request"));
+        if (isHtmxRequest) {
+            response.setContentType("text/html");
+        } else {
+            response.setContentType("application/json");
+        }
         JSONObject responseJSON = new JSONObject();
         String originalURL = request.getParameter("url");
 
@@ -43,9 +48,13 @@ public class CreateShortenedURLServlet extends HttpServlet {
         // Error checking the original URL
         if (originalURL == null || originalURL.isBlank()) {
             response.setStatus(400);
-            responseJSON.put("status", "400");
-            responseJSON.put("status_message", "URL was blank!");
-            response.getWriter().println(responseJSON.toJSONString());
+            if (isHtmxRequest) {
+                response.getWriter().println("<div class=\"alert error\">Please enter a URL before shortening.</div>");
+            } else {
+                responseJSON.put("status", "400");
+                responseJSON.put("status_message", "URL was blank!");
+                response.getWriter().println(responseJSON.toJSONString());
+            }
             return;
         }
 
@@ -57,17 +66,35 @@ public class CreateShortenedURLServlet extends HttpServlet {
         // Don't convert invalid URLs
         if (!this.urlValidator.isValid(originalURL)) {
             response.setStatus(400);
-            responseJSON.put("status", "400");
-            responseJSON.put("status_message", "URL was malformed!");
-            response.getWriter().println(responseJSON.toJSONString());
+            if (isHtmxRequest) {
+                response.getWriter().println("<div class=\"alert error\">That URL doesn't look valid. Check the format and try again.</div>");
+            } else {
+                responseJSON.put("status", "400");
+                responseJSON.put("status_message", "URL was malformed!");
+                response.getWriter().println(responseJSON.toJSONString());
+            }
             return;
         }
 
         // Success
         response.setStatus(200);
-        responseJSON.put("status", "200");
-        responseJSON.put("status_message", "OK");
-        responseJSON.put("short_url", this.urlService.createShortURL(originalURL));
-        response.getWriter().println(responseJSON.toJSONString());
+        String shortCode = this.urlService.createShortURL(originalURL);
+        String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+        String shortUrl = StringEscapeUtils.escapeHtml4(baseUrl + "/" + shortCode);
+        if (isHtmxRequest) {
+            response.getWriter().println(
+                "<div class=\"result\">" +
+                    "<p class=\"result-label\">Short URL</p>" +
+                    "<a class=\"result-link\" href=\"" + shortUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" +
+                        shortUrl +
+                    "</a>" +
+                "</div>"
+            );
+        } else {
+            responseJSON.put("status", "200");
+            responseJSON.put("status_message", "OK");
+            responseJSON.put("short_url", shortUrl);
+            response.getWriter().println(responseJSON.toJSONString());
+        }
     }
 }

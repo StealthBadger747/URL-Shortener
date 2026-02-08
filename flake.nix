@@ -8,6 +8,10 @@
   outputs = { self, nixpkgs }:
     let
       lib = nixpkgs.lib;
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forAllSystems = f: lib.genAttrs systems (system: f {
+        pkgs = import nixpkgs { inherit system; };
+      });
     in {
       nixosModules.url-shortener = { config, lib, pkgs, ... }:
         let
@@ -87,5 +91,28 @@
             };
           };
         };
+
+      devShells = forAllSystems ({ pkgs }: {
+        default = pkgs.mkShell {
+          buildInputs = [
+            pkgs.go
+            pkgs.temurin-bin-21
+            pkgs.maven
+            pkgs.nodejs_20
+            pkgs.redis
+            pkgs.sqlite
+            pkgs.pkg-config
+          ] ++ lib.optionals pkgs.stdenv.isDarwin [
+            pkgs.darwin.libresolv
+            pkgs.clang
+          ];
+          shellHook = ''
+            ${lib.optionalString pkgs.stdenv.isDarwin "export CGO_ENABLED=1"}
+            ${lib.optionalString pkgs.stdenv.isDarwin "export NIX_LDFLAGS=\\\"-L${pkgs.darwin.libresolv}/lib\\\""}
+            ${lib.optionalString pkgs.stdenv.isDarwin "export CGO_LDFLAGS=\\\"-L${pkgs.darwin.libresolv}/lib\\\""}
+            echo "URL-Shortener dev shell loaded"
+          '';
+        };
+      });
     };
 }

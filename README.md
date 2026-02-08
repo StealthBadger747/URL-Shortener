@@ -24,6 +24,28 @@ There are two Bash scripts.
  - The second one is `run_standalone.sh` which requires maven to be installed on the system. The maven build targets Java 11+. The script has environment variables at the top which can be modified.
    - Java 11 or greater is required
 
+## Go (stdlib) version
+The Go implementation uses SQLite for storage and serves the static HTMX frontend.
+
+Run:
+```bash
+go run ./cmd/url-shortener
+```
+
+Environment variables:
+ - `SERVER_PORT` (default `8080`)
+ - `FRONTEND_DIR` (default `FrontendHtmx` if present)
+ - `DATABASE_PATH` (default `url-shortener.db`)
+
+Analytics endpoints (JSON):
+ - `GET /api/analytics/summary`
+ - `GET /api/analytics/top?limit=10`
+ - `GET /api/analytics/recent?limit=10`
+
+Database migrations:
+ - Managed by `goose` and embedded in the binary.
+ - Migrations live in `internal/store/sqlite/migrations`.
+
 ## Sources/Third Party Libraries:
 - htmx for the frontend
 - Bloom Filter from my Distributed File System project.

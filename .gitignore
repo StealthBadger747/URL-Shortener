@@ -25,3 +25,6 @@ Thumbs.db
 # No redis data
 /redis-data
 /redis.conf
+
+# Local sqlite db
+url-shortener.db

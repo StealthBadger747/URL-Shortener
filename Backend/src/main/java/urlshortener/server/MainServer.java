@@ -17,18 +17,18 @@ import java.nio.file.Path;
 public class MainServer {
     /** The port used for the server */
     private final int port;
-    private final Path angularResources;
+    private final Path frontendResources;
     private final ShortURLService urlService;
 
     /**
      * The constructor for the server
      *
      * @param port the port the sever should start on.
-     * @param angularResources the path to the Dist of the Angular project.
+     * @param frontendResources the path to the frontend assets.
      */
-    public MainServer(int port, Path angularResources, ShortURLService urlService) {
+    public MainServer(int port, Path frontendResources, ShortURLService urlService) {
         this.port = port;
-        this.angularResources = angularResources;
+        this.frontendResources = frontendResources;
         this.urlService = urlService;
     }
 
@@ -57,10 +57,10 @@ public class MainServer {
     public HandlerList setupHandlers() {
         HandlerList handlers = new HandlerList();
 
-        // Set up a resource handler for the Angular dist files
+        // Set up a resource handler for the frontend static files
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setDirectoriesListed(false);
-        resourceHandler.setResourceBase(this.angularResources.toString());
+        resourceHandler.setResourceBase(this.frontendResources.toString());
 
         ServletHandler servlets = new ServletHandler();
         servlets.addServletWithMapping(new ServletHolder(new ShortURLResolverServlet(this.urlService)), "/*");

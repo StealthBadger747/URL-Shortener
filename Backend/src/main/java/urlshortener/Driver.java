@@ -16,7 +16,8 @@ import java.nio.file.Path;
  */
 public class Driver {
     public static final String SERVER_PORT_ENV = "SERVER_PORT";
-    public static final String ANGULAR_FRONTEND_DIR_ENV = "ANGULAR_FRONTEND_DIR";
+    public static final String FRONTEND_DIR_ENV = "FRONTEND_DIR";
+    public static final String LEGACY_FRONTEND_DIR_ENV = "ANGULAR_FRONTEND_DIR";
     public static final String USE_REDIS_ENV = "USE_REDIS";
     public static final String REDIS_IP_ENV = "REDIS_IP";
     public static final String REDIS_PORT_ENV = "REDIS_PORT";
@@ -30,7 +31,7 @@ public class Driver {
         /* Setup defaults */
         int serverPort = 8080;
         ShortURLService shortURLService = new ShortURLServiceStandAlone();
-        Path angularFrontendDir;
+        Path frontendDir;
 
         // Try and see if there is a different port to use
 
@@ -64,11 +65,15 @@ public class Driver {
             }
         }
 
-        // Check if the Path to the Angular Frontend is valid
-        if (System.getenv(ANGULAR_FRONTEND_DIR_ENV) != null && StringUtils.isNotBlank(System.getenv(ANGULAR_FRONTEND_DIR_ENV))) {
+        // Check if the Path to the Frontend is valid
+        String frontendDirValue = System.getenv(FRONTEND_DIR_ENV);
+        if (StringUtils.isBlank(frontendDirValue)) {
+            frontendDirValue = System.getenv(LEGACY_FRONTEND_DIR_ENV);
+        }
+        if (StringUtils.isNotBlank(frontendDirValue)) {
             try {
-                angularFrontendDir = Path.of(System.getenv(ANGULAR_FRONTEND_DIR_ENV));
-                MainServer server = new MainServer(serverPort, angularFrontendDir, shortURLService);
+                frontendDir = Path.of(frontendDirValue);
+                MainServer server = new MainServer(serverPort, frontendDir, shortURLService);
                 server.start();
             } catch (InvalidPathException e) {
                 System.err.println("The provided path could not be found!");
@@ -76,7 +81,7 @@ public class Driver {
             }
         }
         else {
-            System.err.println("The front end env variable was blank!");
+            System.err.printf("The '%s' env variable was blank!\n", FRONTEND_DIR_ENV);
             System.exit(1);
         }
     }

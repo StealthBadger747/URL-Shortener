@@ -1,6 +1,6 @@
 # This is a URL Shortener
 ## Architecture
-- Angular and Bootstrap frontend.
+- htmx frontend served as static HTML/CSS.
 - Jetty for the webserver (both frontend and api hosted there).
 - Redis as a database (optional).
   - It was chosen because of my familiarity however there are a couple downsides.
@@ -21,11 +21,11 @@ I went a bit overboard with this implementation than was probably expected, but 
 There are two Bash scripts.
  - The first one is `run_docker.sh` which builds the docker container and then runs it with `docker-compose`. It contains Redis by default as well and the configuration options can be changed in the `docker-compose.yml`.
    - If the persistency is tested with the Redis database. Please wait at least 60s after creating the short URL to stop the docker services. This allows Redis to make a snapshot.
- - The second one is `run_standalone.sh` which requires npm and maven to be installed on the system. The maven build targets Java 11+. The script has environment variables at the top which can be modified.
+ - The second one is `run_standalone.sh` which requires maven to be installed on the system. The maven build targets Java 11+. The script has environment variables at the top which can be modified.
    - Java 11 or greater is required
 
 ## Sources/Third Party Libraries:
-- Angular for frontend
+- htmx for the frontend
 - Bloom Filter from my Distributed File System project.
 - pom.xml libraries:
   - MurMur (fast hashing algo) https://sangupta.com/projects/murmur

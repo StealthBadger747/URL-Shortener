@@ -60,10 +60,11 @@ func main() {
 	capAPIEndpoint := envOrDefault("CAP_API_ENDPOINT", "")
 	password := envOrDefault("SHORTEN_PASSWORD", "")
 	brandName := envOrDefault("BRAND_NAME", "ShortSlug")
+	analyticsPassword := envOrDefault("ANALYTICS_PASSWORD", "")
 
 	srv := &http.Server{
 		Addr:              ":" + *port,
-		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, password, brandName),
+		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, password, brandName, analyticsPassword),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

@@ -25,7 +25,7 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	srv := httptest.NewServer(New(frontendDir, store, nil, "", "", "ShortSlug"))
+	srv := httptest.NewServer(New(frontendDir, store, nil, "", "", "ShortSlug", "secret"))
 	defer srv.Close()
 
 	form := url.Values{}
@@ -76,7 +76,9 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 		t.Fatalf("expected 301, got %d", redirResp.StatusCode)
 	}
 
-	summaryResp, err := http.Get(srv.URL + "/api/analytics/summary")
+	summaryReq, _ := http.NewRequest(http.MethodGet, srv.URL+"/api/analytics/summary", nil)
+	summaryReq.Header.Set("X-Analytics-Password", "secret")
+	summaryResp, err := http.DefaultClient.Do(summaryReq)
 	if err != nil {
 		t.Fatalf("get summary: %v", err)
 	}
@@ -93,7 +95,9 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 		t.Fatalf("unexpected summary: %+v", summary)
 	}
 
-	topResp, err := http.Get(srv.URL + "/api/analytics/top?limit=5")
+	topReq, _ := http.NewRequest(http.MethodGet, srv.URL+"/api/analytics/top?limit=5", nil)
+	topReq.Header.Set("X-Analytics-Password", "secret")
+	topResp, err := http.DefaultClient.Do(topReq)
 	if err != nil {
 		t.Fatalf("get top: %v", err)
 	}

@@ -3,7 +3,7 @@
 - HTMX frontend served as static HTML/CSS.
 - Go stdlib HTTP server for the API and static assets.
 - SQLite for persistence.
-  - Short codes are random, but the Go version reuses the same code for identical long URLs (store-and-reuse).
+  - Short codes are random, but the same code is reused for identical long URLs (store-and-reuse).
 
 ## Note
 This project is also hosted on my server in my apartment.
@@ -31,8 +31,11 @@ Environment variables:
  - `CAP_API_ENDPOINT` (Cap widget API endpoint, used in `static/index.html`)
  - `SHORTEN_PASSWORD` (optional; if set, requires matching password to shorten)
  - `BRAND_NAME` (optional; defaults to `ShortSlug`)
+ - `ANALYTICS_PASSWORD` (optional; if set, enables analytics endpoints)
 
 Analytics endpoints (JSON):
+ - Disabled unless `ANALYTICS_PASSWORD` is set.
+ - Require `X-Analytics-Password` header to access.
  - `GET /api/analytics/summary`
  - `GET /api/analytics/top?limit=10`
  - `GET /api/analytics/recent?limit=10`
@@ -43,6 +46,13 @@ Bot filtering (Cap):
 Database migrations:
  - Managed by `goose` and embedded in the binary.
  - Migrations live in `internal/store/sqlite/migrations`.
+
+## Kubernetes (Helm)
+A Helm chart is available in `charts/shortslug`.
+
+```bash
+helm install shortslug ./charts/shortslug --set image.tag=v1.0.0
+```
 
 ## Sources/Third Party Libraries:
 - htmx for the frontend

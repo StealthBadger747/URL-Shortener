@@ -24,9 +24,10 @@ type Server struct {
 	capEndpoint string
 	password    string
 	brandName   string
+	analyticsPassword string
 }
 
-func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, password string, brandName string) *Server {
+func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, password string, brandName string, analyticsPassword string) *Server {
 	return &Server{
 		frontendDir: frontendDir,
 		store:       store,
@@ -34,6 +35,7 @@ func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, ca
 		capEndpoint: capEndpoint,
 		password:    password,
 		brandName:   brandName,
+		analyticsPassword: analyticsPassword,
 	}
 }
 
@@ -44,6 +46,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/analytics/") {
+		if s.analyticsPassword == "" {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		if r.Header.Get("X-Analytics-Password") != s.analyticsPassword {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		s.handleAnalytics(w, r)
 		return
 	}

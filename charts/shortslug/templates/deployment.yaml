@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shortslug.fullname" . }}
+  labels:
+    {{- include "shortslug.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "shortslug.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "shortslug.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: shortslug
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.env.SERVER_PORT | quote }}
+            - name: FRONTEND_DIR
+              value: {{ .Values.env.FRONTEND_DIR | quote }}
+            - name: DATABASE_PATH
+              value: {{ .Values.env.DATABASE_PATH | quote }}
+            - name: SHORTEN_PASSWORD
+              value: {{ .Values.env.SHORTEN_PASSWORD | quote }}
+            - name: CAP_SITEVERIFY_URL
+              value: {{ .Values.env.CAP_SITEVERIFY_URL | quote }}
+            - name: CAP_SECRET
+              value: {{ .Values.env.CAP_SECRET | quote }}
+            - name: CAP_API_ENDPOINT
+              value: {{ .Values.env.CAP_API_ENDPOINT | quote }}
+            - name: BRAND_NAME
+              value: {{ .Values.env.BRAND_NAME | quote }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ dir .Values.env.DATABASE_PATH | quote }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "shortslug.fullname" . }}
+      {{- end }}

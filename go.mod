@@ -1,4 +1,4 @@
-module url-shortener
+module github.com/StealthBadger747/ShortSlug
 
 go 1.22
 

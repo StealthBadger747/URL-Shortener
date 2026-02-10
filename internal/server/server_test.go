@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"url-shortener/internal/store/sqlite"
+	"github.com/StealthBadger747/ShortSlug/internal/store/sqlite"
 )
 
 func TestShortenRedirectAndAnalytics(t *testing.T) {
@@ -25,7 +25,7 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	srv := httptest.NewServer(New(frontendDir, store, nil, "", ""))
+	srv := httptest.NewServer(New(frontendDir, store, nil, "", "", "ShortSlug"))
 	defer srv.Close()
 
 	form := url.Values{}

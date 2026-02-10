@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"url-shortener/internal/bot"
-	"url-shortener/internal/store"
+	"github.com/StealthBadger747/ShortSlug/internal/bot"
+	"github.com/StealthBadger747/ShortSlug/internal/store"
 )
 
 type Server struct {
@@ -23,15 +23,17 @@ type Server struct {
 	capVerifier *bot.CapVerifier
 	capEndpoint string
 	password    string
+	brandName   string
 }
 
-func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, password string) *Server {
+func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, password string, brandName string) *Server {
 	return &Server{
 		frontendDir: frontendDir,
 		store:       store,
 		capVerifier: capVerifier,
 		capEndpoint: capEndpoint,
 		password:    password,
+		brandName:   brandName,
 	}
 }
 
@@ -219,9 +221,11 @@ func (s *Server) serveIndex(w http.ResponseWriter, r *http.Request) {
 	_ = tmpl.Execute(w, struct {
 		CapAPIEndpoint  string
 		PasswordEnabled bool
+		BrandName       string
 	}{
 		CapAPIEndpoint:  s.capEndpoint,
 		PasswordEnabled: s.password != "",
+		BrandName:       s.brandName,
 	})
 }
 

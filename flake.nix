@@ -13,21 +13,21 @@
         pkgs = import nixpkgs { inherit system; };
       });
     in {
-      nixosModules.url-shortener = { config, lib, pkgs, ... }:
+      nixosModules.shortslug = { config, lib, pkgs, ... }:
         let
-          cfg = config.services.url-shortener;
+          cfg = config.services.shortslug;
         in {
-          options.services.url-shortener = {
-            enable = lib.mkEnableOption "URL Shortener service";
+          options.services.shortslug = {
+            enable = lib.mkEnableOption "ShortSlug service";
 
             binaryPath = lib.mkOption {
               type = lib.types.path;
-              description = "Path to the url-shortener Go binary.";
+              description = "Path to the ShortSlug Go binary.";
             };
 
             frontendDir = lib.mkOption {
               type = lib.types.path;
-              default = "/var/lib/url-shortener/frontend";
+              default = "/var/lib/shortslug/frontend";
               description = "Path to the static frontend assets directory.";
             };
 
@@ -39,19 +39,19 @@
 
             environmentFileDir = lib.mkOption {
               type = lib.types.str;
-              default = "/etc/url-shortener";
+              default = "/etc/shortslug";
               description = "Directory containing environment files for each instance.";
             };
 
             user = lib.mkOption {
               type = lib.types.str;
-              default = "url-shortener";
+              default = "shortslug";
               description = "User that runs the service.";
             };
 
             group = lib.mkOption {
               type = lib.types.str;
-              default = "url-shortener";
+              default = "shortslug";
               description = "Group that runs the service.";
             };
           };
@@ -64,8 +64,8 @@
 
             users.groups.${cfg.group} = { };
 
-            systemd.services."url-shortener@" = {
-              description = "URL Shortener instance %i";
+            systemd.services."shortslug@" = {
+              description = "ShortSlug instance %i";
               after = [ "network.target" ];
               wantedBy = [ "multi-user.target" ];
 
@@ -101,7 +101,7 @@
             ${lib.optionalString pkgs.stdenv.isDarwin "export CGO_ENABLED=1"}
             ${lib.optionalString pkgs.stdenv.isDarwin "export NIX_LDFLAGS=\\\"-L${pkgs.darwin.libresolv}/lib\\\""}
             ${lib.optionalString pkgs.stdenv.isDarwin "export CGO_LDFLAGS=\\\"-L${pkgs.darwin.libresolv}/lib\\\""}
-            echo "URL-Shortener dev shell loaded"
+            echo "ShortSlug dev shell loaded"
             echo "Optional env vars: CAP_SITEVERIFY_URL, CAP_SECRET, CAP_API_ENDPOINT, SHORTEN_PASSWORD"
           '';
         };

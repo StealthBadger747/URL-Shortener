@@ -1,14 +1,14 @@
 version: "3"
 services:
-  url-shortener:
+  shortslug:
     build: .
-    image: url-shortener
+    image: shortslug
     ports:
       - "8080:8080"
     environment:
       - SERVER_PORT=8080
       - FRONTEND_DIR=/app/static
-      - DATABASE_PATH=/data/url-shortener.db
+      - DATABASE_PATH=/data/shortslug.db
       # Optional password gate for /api/shorten_url
       # - SHORTEN_PASSWORD=change-me
       # Optional Cap bot filtering (requires cap service)
@@ -22,10 +22,10 @@ services:
   # cap:
   #   image: tiagozip/cap:latest
   #   networks:
-  #     - url-shortener-network
+  #     - shortslug-network
   #   environment:
   #     - CAP_SECRET=change-me
 
 # networks:
-#   url-shortener-network:
+#   shortslug-network:
 #     driver: bridge

@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"url-shortener/internal/bot"
-	"url-shortener/internal/server"
-	"url-shortener/internal/store/sqlite"
+	"github.com/StealthBadger747/ShortSlug/internal/bot"
+	"github.com/StealthBadger747/ShortSlug/internal/server"
+	"github.com/StealthBadger747/ShortSlug/internal/store/sqlite"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	}
 
 	if *dbPath == "" {
-		*dbPath = "url-shortener.db"
+		*dbPath = "shortslug.db"
 	}
 
 	absFrontend, err := filepath.Abs(*frontendDir)
@@ -59,10 +59,11 @@ func main() {
 	}
 	capAPIEndpoint := envOrDefault("CAP_API_ENDPOINT", "")
 	password := envOrDefault("SHORTEN_PASSWORD", "")
+	brandName := envOrDefault("BRAND_NAME", "ShortSlug")
 
 	srv := &http.Server{
 		Addr:              ":" + *port,
-		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, password),
+		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, password, brandName),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

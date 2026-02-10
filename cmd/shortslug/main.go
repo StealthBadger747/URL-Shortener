@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"url-shortener/internal/bot"
-	"url-shortener/internal/server"
-	"url-shortener/internal/store/sqlite"
+	"github.com/StealthBadger747/ShortSlug/internal/bot"
+	"github.com/StealthBadger747/ShortSlug/internal/server"
+	"github.com/StealthBadger747/ShortSlug/internal/store/sqlite"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	}
 
 	if *dbPath == "" {
-		*dbPath = "url-shortener.db"
+		*dbPath = "shortslug.db"
 	}
 
 	absFrontend, err := filepath.Abs(*frontendDir)

@@ -8,8 +8,8 @@ import (
 
 	"github.com/mattn/go-sqlite3"
 
-	"url-shortener/internal/store"
-	"url-shortener/internal/util"
+	"github.com/StealthBadger747/ShortSlug/internal/store"
+	"github.com/StealthBadger747/ShortSlug/internal/util"
 )
 
 const (

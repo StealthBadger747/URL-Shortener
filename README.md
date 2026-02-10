@@ -1,4 +1,4 @@
-# This is a URL Shortener
+# ShortSlug
 ## Architecture
 - HTMX frontend served as static HTML/CSS.
 - Go stdlib HTTP server for the API and static assets.
@@ -7,14 +7,14 @@
 
 ## Note
 This project is also hosted on my server in my apartment.
-I went a bit overboard with this implementation than was probably expected, but I have been wanting to create a URL Shortener for myself for a while now and this was just a good opportunity. My server environment is exclusively in Docker so it didn't take too long to set up.
+I went a bit overboard with this implementation than was probably expected, but I have been wanting to create ShortSlug for myself for a while now and this was just a good opportunity. My server environment is exclusively in Docker so it didn't take too long to set up.
 
 ## How to run/build
 The Go implementation uses SQLite for storage and serves the static HTMX frontend.
 
 Run:
 ```bash
-go run ./cmd/url-shortener
+go run ./cmd/shortslug
 ```
 
 Docker:
@@ -25,7 +25,7 @@ Docker:
 Environment variables:
  - `SERVER_PORT` (default `8080`)
  - `FRONTEND_DIR` (default `static` if present)
- - `DATABASE_PATH` (default `url-shortener.db`)
+ - `DATABASE_PATH` (default `shortslug.db`)
  - `CAP_SITEVERIFY_URL` (Cap siteverify endpoint; enables bot filtering)
  - `CAP_SECRET` (Cap secret key)
  - `CAP_API_ENDPOINT` (Cap widget API endpoint, used in `static/index.html`)

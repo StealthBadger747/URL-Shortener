@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"url-shortener/internal/bot"
-	"url-shortener/internal/store"
+	"github.com/StealthBadger747/ShortSlug/internal/bot"
+	"github.com/StealthBadger747/ShortSlug/internal/store"
 )
 
 type Server struct {

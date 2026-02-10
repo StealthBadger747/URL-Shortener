@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"url-shortener/internal/store/sqlite"
+	"github.com/StealthBadger747/ShortSlug/internal/store/sqlite"
 )
 
 func TestShortenRedirectAndAnalytics(t *testing.T) {

@@ -25,7 +25,7 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	srv := httptest.NewServer(New(frontendDir, store))
+	srv := httptest.NewServer(New(frontendDir, store, nil, "", ""))
 	defer srv.Close()
 
 	form := url.Values{}
@@ -44,6 +44,22 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	if body.ShortURL == "" {
 		t.Fatalf("expected short url")
+	}
+
+	resp2, err := http.PostForm(srv.URL+"/api/shorten_url", form)
+	if err != nil {
+		t.Fatalf("post form again: %v", err)
+	}
+	defer resp2.Body.Close()
+
+	var body2 struct {
+		ShortURL string `json:"short_url"`
+	}
+	if err := json.NewDecoder(resp2.Body).Decode(&body2); err != nil {
+		t.Fatalf("decode json 2: %v", err)
+	}
+	if body2.ShortURL != body.ShortURL {
+		t.Fatalf("expected same short url for same input")
 	}
 
 	parts := strings.Split(strings.TrimSuffix(body.ShortURL, "/"), "/")

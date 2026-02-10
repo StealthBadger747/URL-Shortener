@@ -6,6 +6,9 @@
     <title>URL Shortener</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/htmx.org@2.0.8"></script>
+    {{- if .CapAPIEndpoint }}
+    <script src="https://unpkg.com/@tiagozip/cap@latest/cap.min.js"></script>
+    {{- end }}
   </head>
   <body>
     <main class="container">
@@ -31,6 +34,15 @@
               required
             />
           </label>
+          {{- if .PasswordEnabled }}
+          <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" placeholder="Password" />
+          </label>
+          {{- end }}
+          {{- if .CapAPIEndpoint }}
+          <cap-widget data-cap-api-endpoint="{{ .CapAPIEndpoint }}"></cap-widget>
+          {{- end }}
           <button type="submit">Shorten URL</button>
         </form>
 

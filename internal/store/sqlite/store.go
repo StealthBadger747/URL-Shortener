@@ -43,6 +43,13 @@ func Open(path string) (*Store, error) {
 }
 
 func (s *Store) CreateShortURL(originalURL string) (string, error) {
+	var existing string
+	if err := s.db.QueryRow(`SELECT code FROM urls WHERE url = ?`, originalURL).Scan(&existing); err == nil {
+		return existing, nil
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return "", err
+	}
+
 	stmt, err := s.db.Prepare(`INSERT INTO urls(code, url, created_at) VALUES(?, ?, ?)`)
 	if err != nil {
 		return "", err
@@ -61,6 +68,11 @@ func (s *Store) CreateShortURL(originalURL string) (string, error) {
 		}
 
 		if isConstraintError(err) {
+			if err := s.db.QueryRow(`SELECT code FROM urls WHERE url = ?`, originalURL).Scan(&existing); err == nil {
+				return existing, nil
+			} else if !errors.Is(err, sql.ErrNoRows) {
+				return "", err
+			}
 			continue
 		}
 

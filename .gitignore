@@ -28,3 +28,7 @@ Thumbs.db
 
 # Local sqlite db
 url-shortener.db
+data/
+*.db
+redis-data
+redis.conf

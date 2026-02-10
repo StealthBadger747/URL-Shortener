@@ -13,16 +13,26 @@ import (
 	"strconv"
 	"strings"
 
+	"url-shortener/internal/bot"
 	"url-shortener/internal/store"
 )
 
 type Server struct {
 	frontendDir string
 	store       store.Store
+	capVerifier *bot.CapVerifier
+	capEndpoint string
+	password    string
 }
 
-func New(frontendDir string, store store.Store) *Server {
-	return &Server{frontendDir: frontendDir, store: store}
+func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, password string) *Server {
+	return &Server{
+		frontendDir: frontendDir,
+		store:       store,
+		capVerifier: capVerifier,
+		capEndpoint: capEndpoint,
+		password:    password,
+	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +52,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == "/" {
-		s.serveFile(w, r, "index.html")
+		s.serveIndex(w, r)
 		return
 	}
 
@@ -57,6 +67,21 @@ func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		writeError(w, r, http.StatusBadRequest, "Invalid form data.")
 		return
+	}
+
+	if s.password != "" {
+		if r.FormValue("password") != s.password {
+			writeError(w, r, http.StatusUnauthorized, "Invalid password.")
+			return
+		}
+	}
+
+	if s.capVerifier != nil && s.capVerifier.Enabled() {
+		token := r.FormValue("cap-token")
+		if err := s.capVerifier.Verify(r.Context(), token); err != nil {
+			writeError(w, r, http.StatusBadRequest, "Bot verification failed.")
+			return
+		}
 	}
 
 	originalURL := strings.TrimSpace(r.FormValue("url"))
@@ -181,6 +206,23 @@ func (s *Server) tryServeStatic(w http.ResponseWriter, r *http.Request) bool {
 func (s *Server) serveFile(w http.ResponseWriter, r *http.Request, file string) {
 	filePath := filepath.Join(s.frontendDir, file)
 	http.ServeFile(w, r, filePath)
+}
+
+func (s *Server) serveIndex(w http.ResponseWriter, r *http.Request) {
+	indexPath := filepath.Join(s.frontendDir, "index.html")
+	tmpl, err := template.ParseFiles(indexPath)
+	if err != nil {
+		http.ServeFile(w, r, indexPath)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_ = tmpl.Execute(w, struct {
+		CapAPIEndpoint  string
+		PasswordEnabled bool
+	}{
+		CapAPIEndpoint:  s.capEndpoint,
+		PasswordEnabled: s.password != "",
+	})
 }
 
 func isHtmxRequest(r *http.Request) bool {

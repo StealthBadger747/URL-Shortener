@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"url-shortener/internal/bot"
 	"url-shortener/internal/server"
 	"url-shortener/internal/store/sqlite"
 )
@@ -30,10 +31,8 @@ func main() {
 	flag.Parse()
 
 	if *frontendDir == "" {
-		if dirExists("FrontendHtmx") {
-			*frontendDir = "FrontendHtmx"
-		} else if dirExists("Frontend") {
-			*frontendDir = "Frontend"
+		if dirExists("static") {
+			*frontendDir = "static"
 		} else {
 			log.Fatalf("frontend directory not set; use FRONTEND_DIR or -frontend")
 		}
@@ -54,9 +53,16 @@ func main() {
 	}
 	defer store.Close()
 
+	capVerifier := &bot.CapVerifier{
+		SiteVerifyURL: envOrDefault("CAP_SITEVERIFY_URL", ""),
+		Secret:        envOrDefault("CAP_SECRET", ""),
+	}
+	capAPIEndpoint := envOrDefault("CAP_API_ENDPOINT", "")
+	password := envOrDefault("SHORTEN_PASSWORD", "")
+
 	srv := &http.Server{
 		Addr:              ":" + *port,
-		Handler:           server.New(absFrontend, store),
+		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, password),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

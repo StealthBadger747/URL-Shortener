@@ -16,6 +16,13 @@ func TestStoreCreateResolveAndAnalytics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create short url: %v", err)
 	}
+	code2, err := store.CreateShortURL("http://example.com")
+	if err != nil {
+		t.Fatalf("create short url again: %v", err)
+	}
+	if code2 != code {
+		t.Fatalf("expected same code for same url, got %s vs %s", code, code2)
+	}
 
 	url, ok, err := store.ResolveShortURL(code)
 	if err != nil {

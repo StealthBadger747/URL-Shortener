@@ -25,7 +25,7 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	srv := httptest.NewServer(New(frontendDir, store, nil, "", ""))
+	srv := httptest.NewServer(New(frontendDir, store, nil, "", "", "ShortSlug"))
 	defer srv.Close()
 
 	form := url.Values{}

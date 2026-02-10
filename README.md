@@ -30,6 +30,7 @@ Environment variables:
  - `CAP_SECRET` (Cap secret key)
  - `CAP_API_ENDPOINT` (Cap widget API endpoint, used in `static/index.html`)
  - `SHORTEN_PASSWORD` (optional; if set, requires matching password to shorten)
+ - `BRAND_NAME` (optional; defaults to `ShortSlug`)
 
 Analytics endpoints (JSON):
  - `GET /api/analytics/summary`

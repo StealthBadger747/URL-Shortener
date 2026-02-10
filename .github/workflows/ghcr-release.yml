@@ -40,6 +40,7 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/shortslug
           tags: |
             type=semver,pattern={{version}}
+            type=raw,value=${{ github.event.release.tag_name || inputs.tag }}
             type=raw,value=latest
 
       - name: Build and push

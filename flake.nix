@@ -8,6 +8,10 @@
   outputs = { self, nixpkgs }:
     let
       lib = nixpkgs.lib;
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forAllSystems = f: lib.genAttrs systems (system: f {
+        pkgs = import nixpkgs { inherit system; };
+      });
     in {
       nixosModules.url-shortener = { config, lib, pkgs, ... }:
         let
@@ -16,21 +20,15 @@
           options.services.url-shortener = {
             enable = lib.mkEnableOption "URL Shortener service";
 
-            jarPath = lib.mkOption {
+            binaryPath = lib.mkOption {
               type = lib.types.path;
-              description = "Path to the Url-Shortener-1.0.jar file.";
+              description = "Path to the url-shortener Go binary.";
             };
 
             frontendDir = lib.mkOption {
               type = lib.types.path;
               default = "/var/lib/url-shortener/frontend";
               description = "Path to the static frontend assets directory.";
-            };
-
-            javaPackage = lib.mkOption {
-              type = lib.types.package;
-              default = pkgs.temurin-bin-21;
-              description = "Java runtime package used to run the service.";
             };
 
             defaultPort = lib.mkOption {
@@ -76,7 +74,7 @@
                 User = cfg.user;
                 Group = cfg.group;
                 EnvironmentFile = "${cfg.environmentFileDir}/%i.env";
-                ExecStart = "${cfg.javaPackage}/bin/java -jar ${cfg.jarPath}";
+                ExecStart = "${cfg.binaryPath}";
                 Restart = "on-failure";
               };
 
@@ -87,5 +85,26 @@
             };
           };
         };
+
+      devShells = forAllSystems ({ pkgs }: {
+        default = pkgs.mkShell {
+          buildInputs = [
+            pkgs.go
+            pkgs.nodejs_20
+            pkgs.sqlite
+            pkgs.pkg-config
+          ] ++ lib.optionals pkgs.stdenv.isDarwin [
+            pkgs.darwin.libresolv
+            pkgs.clang
+          ];
+          shellHook = ''
+            ${lib.optionalString pkgs.stdenv.isDarwin "export CGO_ENABLED=1"}
+            ${lib.optionalString pkgs.stdenv.isDarwin "export NIX_LDFLAGS=\\\"-L${pkgs.darwin.libresolv}/lib\\\""}
+            ${lib.optionalString pkgs.stdenv.isDarwin "export CGO_LDFLAGS=\\\"-L${pkgs.darwin.libresolv}/lib\\\""}
+            echo "URL-Shortener dev shell loaded"
+            echo "Optional env vars: CAP_SITEVERIFY_URL, CAP_SECRET, CAP_API_ENDPOINT, SHORTEN_PASSWORD"
+          '';
+        };
+      });
     };
 }

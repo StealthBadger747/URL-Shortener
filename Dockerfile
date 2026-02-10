@@ -1,24 +1,25 @@
-FROM maven:3-eclipse-temurin-21-alpine as maven-build-stage
+FROM golang:1.22-alpine AS build
 
-COPY ./FrontendHtmx /app/frontend
+RUN apk add --no-cache build-base sqlite-dev
 
-COPY ./Backend /app/backend
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 
-WORKDIR /app/backend
+COPY cmd ./cmd
+COPY internal ./internal
+COPY static ./static
 
-RUN mvn install && \
-    mvn package
+RUN go build -o /app/url-shortener ./cmd/url-shortener
 
-# This is were it gets run
-FROM eclipse-temurin:21-alpine
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates sqlite-libs
 
-COPY --from=maven-build-stage /app/backend/target/Url-Shortener-1.0.jar /app/backend/
-COPY --from=maven-build-stage /app/frontend /app/frontend
+WORKDIR /app
+COPY --from=build /app/url-shortener /app/url-shortener
+COPY --from=build /app/static /app/static
 
-ENV FRONTEND_DIR=/app/frontend
+ENV FRONTEND_DIR=/app/static
+EXPOSE 8080
 
-# The server port is hardcoded because it doesn't need to be changed here
-# If you want it to be different change the port mapping in your docker run command or docker-compose file.
-ENV SERVER_PORT=8999
-
-CMD [ "java", "-jar", "/app/backend/Url-Shortener-1.0.jar" ]
+CMD ["/app/url-shortener"]

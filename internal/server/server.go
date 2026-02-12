@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,28 +19,32 @@ import (
 )
 
 type Server struct {
-	frontendDir string
-	store       store.Store
-	capVerifier *bot.CapVerifier
-	capEndpoint string
-	password    string
-	brandName   string
+	frontendDir       string
+	store             store.Store
+	capVerifier       *bot.CapVerifier
+	capEndpoint       string
+	publicBaseURL     string
+	password          string
+	brandName         string
 	analyticsPassword string
 }
 
-func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, password string, brandName string, analyticsPassword string) *Server {
+func New(frontendDir string, store store.Store, capVerifier *bot.CapVerifier, capEndpoint string, publicBaseURL string, password string, brandName string, analyticsPassword string) *Server {
 	return &Server{
-		frontendDir: frontendDir,
-		store:       store,
-		capVerifier: capVerifier,
-		capEndpoint: capEndpoint,
-		password:    password,
-		brandName:   brandName,
+		frontendDir:       frontendDir,
+		store:             store,
+		capVerifier:       capVerifier,
+		capEndpoint:       capEndpoint,
+		publicBaseURL:     strings.TrimRight(publicBaseURL, "/"),
+		password:          password,
+		brandName:         brandName,
 		analyticsPassword: analyticsPassword,
 	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	setSecurityHeaders(w)
+
 	if r.Method == http.MethodPost && r.URL.Path == "/api/shorten_url" {
 		s.handleShorten(w, r)
 		return
@@ -50,7 +55,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		if r.Header.Get("X-Analytics-Password") != s.analyticsPassword {
+		if !secureCompare(r.Header.Get("X-Analytics-Password"), s.analyticsPassword) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -76,6 +81,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+
 	if err := r.ParseForm(); err != nil {
 		writeError(w, r, http.StatusBadRequest, "Invalid form data.")
 		return
@@ -118,7 +125,7 @@ func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	baseURL := fmt.Sprintf("%s://%s", schemeForRequest(r), r.Host)
+	baseURL := s.baseURLForRequest(r)
 	shortURL := baseURL + "/" + code
 
 	if isHtmxRequest(r) {
@@ -276,14 +283,93 @@ func renderHtmxResult(shortURL string) string {
 		"</div>"
 }
 
+func (s *Server) baseURLForRequest(r *http.Request) string {
+	if s.publicBaseURL != "" {
+		return s.publicBaseURL
+	}
+	return fmt.Sprintf("%s://%s", schemeForRequest(r), hostForRequest(r))
+}
+
+func hostForRequest(r *http.Request) string {
+	if host := forwardedHeaderValue(r.Header.Get("Forwarded"), "host"); host != "" {
+		return safeHost(host)
+	}
+	if host := firstCSVToken(r.Header.Get("X-Forwarded-Host")); host != "" {
+		return safeHost(host)
+	}
+	if host := strings.TrimSpace(r.Header.Get("X-Original-Host")); host != "" {
+		return safeHost(host)
+	}
+	return safeHost(r.Host)
+}
+
 func schemeForRequest(r *http.Request) string {
+	if proto := forwardedHeaderValue(r.Header.Get("Forwarded"), "proto"); proto != "" {
+		return sanitizeScheme(proto)
+	}
+	if proto := firstCSVToken(r.Header.Get("X-Forwarded-Proto")); proto != "" {
+		return sanitizeScheme(proto)
+	}
 	if r.TLS != nil {
 		return "https"
 	}
-	if proto := r.Header.Get("X-Forwarded-Proto"); proto != "" {
-		return proto
+	return "http"
+}
+
+func sanitizeScheme(scheme string) string {
+	scheme = strings.ToLower(strings.TrimSpace(scheme))
+	if scheme == "https" {
+		return "https"
 	}
 	return "http"
+}
+
+func firstCSVToken(raw string) string {
+	for _, part := range strings.Split(raw, ",") {
+		if tok := strings.TrimSpace(part); tok != "" {
+			return tok
+		}
+	}
+	return ""
+}
+
+func forwardedHeaderValue(raw, key string) string {
+	first := firstCSVToken(raw)
+	if first == "" {
+		return ""
+	}
+	for _, kv := range strings.Split(first, ";") {
+		parts := strings.SplitN(strings.TrimSpace(kv), "=", 2)
+		if len(parts) != 2 || !strings.EqualFold(parts[0], key) {
+			continue
+		}
+		val := strings.TrimSpace(parts[1])
+		val = strings.Trim(val, "\"")
+		return val
+	}
+	return ""
+}
+
+func setSecurityHeaders(w http.ResponseWriter) {
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("X-Frame-Options", "DENY")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+}
+
+func safeHost(host string) string {
+	host = strings.TrimSpace(host)
+	if host == "" || strings.ContainsAny(host, "/\\\n\r\t") {
+		return "localhost"
+	}
+	return host
+}
+
+func secureCompare(got, expected string) bool {
+	if expected == "" {
+		return got == ""
+	}
+	return subtle.ConstantTimeCompare([]byte(got), []byte(expected)) == 1
 }
 
 func parseLimit(raw string) int {

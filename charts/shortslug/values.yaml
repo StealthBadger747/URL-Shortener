@@ -21,7 +21,9 @@ env:
   CAP_SITEVERIFY_URL: ""
   CAP_SECRET: ""
   CAP_API_ENDPOINT: ""
+  PUBLIC_BASE_URL: ""
   BRAND_NAME: "ShortSlug"
+  ANALYTICS_PASSWORD: ""
 
 persistence:
   enabled: true

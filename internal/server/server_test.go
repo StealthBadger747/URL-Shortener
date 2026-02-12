@@ -25,7 +25,7 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	srv := httptest.NewServer(New(frontendDir, store, nil, "", "", "ShortSlug", "secret"))
+	srv := httptest.NewServer(New(frontendDir, store, nil, "", "", "", "ShortSlug", "secret"))
 	defer srv.Close()
 
 	form := url.Values{}
@@ -109,6 +109,146 @@ func TestShortenRedirectAndAnalytics(t *testing.T) {
 	}
 	if len(top) != 1 {
 		t.Fatalf("expected 1 top entry, got %d", len(top))
+	}
+}
+
+func TestShortenUsesConfiguredPublicBaseURL(t *testing.T) {
+	frontendDir := t.TempDir()
+	if err := writeIndex(frontendDir); err != nil {
+		t.Fatalf("write index: %v", err)
+	}
+
+	store, err := sqlite.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+
+	srv := httptest.NewServer(New(frontendDir, store, nil, "", "https://sho.rt", "", "ShortSlug", ""))
+	defer srv.Close()
+
+	form := url.Values{}
+	form.Set("url", "example.com")
+	resp, err := http.PostForm(srv.URL+"/api/shorten_url", form)
+	if err != nil {
+		t.Fatalf("post form: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var body struct {
+		ShortURL string `json:"short_url"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("decode json: %v", err)
+	}
+
+	if !strings.HasPrefix(body.ShortURL, "https://sho.rt/") {
+		t.Fatalf("expected short URL to use configured base URL, got %q", body.ShortURL)
+	}
+}
+
+func TestShortenUsesForwardedHeadersForBaseURL(t *testing.T) {
+	frontendDir := t.TempDir()
+	if err := writeIndex(frontendDir); err != nil {
+		t.Fatalf("write index: %v", err)
+	}
+
+	store, err := sqlite.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+
+	h := New(frontendDir, store, nil, "", "", "", "ShortSlug", "")
+	form := strings.NewReader("url=example.com")
+	req := httptest.NewRequest(http.MethodPost, "/api/shorten_url", form)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("X-Forwarded-Proto", "https")
+	req.Header.Set("X-Forwarded-Host", "slug.example.com")
+	req.Host = "internal:8080"
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rr.Code)
+	}
+	var body struct {
+		ShortURL string `json:"short_url"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&body); err != nil {
+		t.Fatalf("decode json: %v", err)
+	}
+	if !strings.HasPrefix(body.ShortURL, "https://slug.example.com/") {
+		t.Fatalf("expected forwarded host/proto short URL, got %q", body.ShortURL)
+	}
+}
+
+func TestShortenUsesRFCForwardedHeader(t *testing.T) {
+	frontendDir := t.TempDir()
+	if err := writeIndex(frontendDir); err != nil {
+		t.Fatalf("write index: %v", err)
+	}
+
+	store, err := sqlite.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+
+	h := New(frontendDir, store, nil, "", "", "", "ShortSlug", "")
+	form := strings.NewReader("url=example.com")
+	req := httptest.NewRequest(http.MethodPost, "/api/shorten_url", form)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Forwarded", "for=1.2.3.4;proto=https;host=go.example.net")
+	req.Host = "internal:8080"
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rr.Code)
+	}
+	var body struct {
+		ShortURL string `json:"short_url"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&body); err != nil {
+		t.Fatalf("decode json: %v", err)
+	}
+	if !strings.HasPrefix(body.ShortURL, "https://go.example.net/") {
+		t.Fatalf("expected forwarded header short URL, got %q", body.ShortURL)
+	}
+}
+
+func TestSecurityHeadersPresent(t *testing.T) {
+	frontendDir := t.TempDir()
+	if err := writeIndex(frontendDir); err != nil {
+		t.Fatalf("write index: %v", err)
+	}
+
+	store, err := sqlite.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+
+	h := New(frontendDir, store, nil, "", "", "", "ShortSlug", "")
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatalf("missing nosniff header")
+	}
+	if rr.Header().Get("X-Frame-Options") != "DENY" {
+		t.Fatalf("missing frame options header")
+	}
+	if rr.Header().Get("Referrer-Policy") != "no-referrer" {
+		t.Fatalf("missing referrer policy header")
+	}
+	if rr.Header().Get("Content-Security-Policy") == "" {
+		t.Fatalf("missing csp header")
 	}
 }
 

@@ -1,6 +1,8 @@
 module github.com/StealthBadger747/ShortSlug
 
-go 1.22
+go 1.25.0
+
+toolchain go1.25.7
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.22

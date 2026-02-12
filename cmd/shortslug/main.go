@@ -20,9 +20,9 @@ import (
 
 func main() {
 	var (
-		defaultPort = envOrDefault("SERVER_PORT", "8080")
+		defaultPort     = envOrDefault("SERVER_PORT", "8080")
 		defaultFrontend = envOrDefault("FRONTEND_DIR", "")
-		defaultDB = envOrDefault("DATABASE_PATH", "")
+		defaultDB       = envOrDefault("DATABASE_PATH", "")
 	)
 
 	port := flag.String("port", defaultPort, "server port")
@@ -58,13 +58,14 @@ func main() {
 		Secret:        envOrDefault("CAP_SECRET", ""),
 	}
 	capAPIEndpoint := envOrDefault("CAP_API_ENDPOINT", "")
+	publicBaseURL := envOrDefault("PUBLIC_BASE_URL", "")
 	password := envOrDefault("SHORTEN_PASSWORD", "")
 	brandName := envOrDefault("BRAND_NAME", "ShortSlug")
 	analyticsPassword := envOrDefault("ANALYTICS_PASSWORD", "")
 
 	srv := &http.Server{
 		Addr:              ":" + *port,
-		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, password, brandName, analyticsPassword),
+		Handler:           server.New(absFrontend, store, capVerifier, capAPIEndpoint, publicBaseURL, password, brandName, analyticsPassword),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

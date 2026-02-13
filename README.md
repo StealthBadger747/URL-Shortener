@@ -51,7 +51,7 @@ Database migrations:
 A Helm chart is available in `charts/shortslug`.
 
 ```bash
-helm install shortslug ./charts/shortslug --set image.tag=v1.0.0
+helm install shortslug ./charts/shortslug --set image.tag=v1.0.2
 ```
 
 ## Sources/Third Party Libraries:

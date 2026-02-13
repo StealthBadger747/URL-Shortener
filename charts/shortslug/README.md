@@ -3,7 +3,7 @@
 Install:
 ```bash
 helm install shortslug ./charts/shortslug \
-  --set image.tag=v1.0.0
+  --set image.tag=v1.0.2
 ```
 
 Values of interest:

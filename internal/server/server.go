@@ -218,6 +218,9 @@ func (s *Server) tryServeStatic(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 
+	if shouldCacheStatic(cleanPath) {
+		w.Header().Set("Cache-Control", "public, max-age=604800")
+	}
 	http.ServeFile(w, r, absPath)
 	return true
 }
@@ -384,4 +387,13 @@ func parseLimit(raw string) int {
 		return 100
 	}
 	return val
+}
+
+func shouldCacheStatic(cleanPath string) bool {
+	switch strings.ToLower(path.Ext(cleanPath)) {
+	case ".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp":
+		return true
+	default:
+		return false
+	}
 }
